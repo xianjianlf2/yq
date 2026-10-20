@@ -126,6 +126,7 @@ var participleYqRules = []*participleYqRule{
 	simpleOp("first", firstOpType),
 
 	simpleOp("reverse", reverseOpType),
+	simpleOp("empty", emptyOpType),
 
 	simpleOp("any_c", anyConditionOpType),
 	simpleOp("any", anyOpType),
