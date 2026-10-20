@@ -18,6 +18,7 @@ var indent = 2
 var noDocSeparators = false
 var nullInput = false
 var nulSepOutput = false
+var joinOutput = false
 var verbose = false
 var version = false
 var prettyPrint = false

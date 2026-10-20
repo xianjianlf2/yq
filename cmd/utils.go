@@ -73,6 +73,9 @@ func handleBackwardsCompatibility() {
 }
 
 func validateCommandFlags(args []string) error {
+	if joinOutput && nulSepOutput {
+		return fmt.Errorf("join-output cannot be used with nul-output")
+	}
 	if writeInplace && (len(args) == 0 || args[0] == "-") {
 		return fmt.Errorf("write in place flag only applicable when giving an expression and at least one file")
 	}
@@ -221,8 +224,8 @@ func configureEncoder() (yqlib.Encoder, error) {
 	yqlib.ConfiguredHclPreferences.ColorsEnabled = colorsEnabled
 	yqlib.ConfiguredTomlPreferences.ColorsEnabled = colorsEnabled
 
-	yqlib.ConfiguredYamlPreferences.PrintDocSeparators = !noDocSeparators
-	yqlib.ConfiguredKYamlPreferences.PrintDocSeparators = !noDocSeparators
+	yqlib.ConfiguredYamlPreferences.PrintDocSeparators = !noDocSeparators && !joinOutput
+	yqlib.ConfiguredKYamlPreferences.PrintDocSeparators = !noDocSeparators && !joinOutput
 
 	encoder := yqlibOutputFormat.EncoderFactory()
 

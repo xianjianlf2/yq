@@ -422,6 +422,7 @@ Flags:
       --lua-unquoted                    output unquoted string keys (e.g. {foo="bar"})
   -M, --no-colors                       force print with no colors
   -N, --no-doc                          Don't print document separators (---)
+      --join-output                     Print values without document separators or a trailing newline
   -0, --nul-output                      Use NUL char to separate values. If unwrap scalar is also set, fail if unwrapped scalar contains NUL char.
   -n, --null-input                      Don't read input, simply evaluate the expression given. Useful for creating docs from scratch.
   -o, --output-format string            [auto|a|yaml|y|json|j|kyaml|ky|props|p|csv|c|tsv|t|xml|x|base64|uri|toml|hcl|h|shell|s|lua|l|ini|i] output format type. (default "auto")
@@ -451,6 +452,23 @@ Flags:
 
 Use "yq [command] --help" for more information about a command.
 ```
+
+### Output without a trailing newline
+
+Use `--join-output` to concatenate results without added newlines or document
+separators. Newlines within the values are preserved:
+
+```bash
+yq --join-output '.foo' file.yaml
+# Prints bar with no trailing newline when foo is bar.
+
+yq -n --join-output '"foo", "bar"'
+# Prints foobar.
+```
+
+For raw strings with JSON output, also pass `-r`. Without `-r`, JSON strings
+keep their quotes. `--join-output` cannot be combined with `--nul-output`.
+The existing `-j` shorthand still selects JSON output.
 
 ## Troubleshooting
 

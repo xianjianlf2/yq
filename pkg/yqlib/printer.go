@@ -15,6 +15,7 @@ type Printer interface {
 	//e.g. when given a front-matter doc, like jekyll
 	SetAppendix(reader io.Reader)
 	SetNulSepOutput(nulSepOutput bool)
+	SetJoinOutput(joinOutput bool)
 }
 
 type resultsPrinter struct {
@@ -27,6 +28,7 @@ type resultsPrinter struct {
 	treeNavigator     DataTreeNavigator
 	appendixReader    io.Reader
 	nulSepOutput      bool
+	joinOutput        bool
 }
 
 func NewPrinter(encoder Encoder, printerWriter PrinterWriter) Printer {
@@ -43,6 +45,10 @@ func (p *resultsPrinter) SetNulSepOutput(nulSepOutput bool) {
 	log.Debug("Setting NUL separator output")
 
 	p.nulSepOutput = nulSepOutput
+}
+
+func (p *resultsPrinter) SetJoinOutput(joinOutput bool) {
+	p.joinOutput = joinOutput
 }
 
 func (p *resultsPrinter) SetAppendix(reader io.Reader) {
@@ -115,7 +121,7 @@ func (p *resultsPrinter) PrintResults(matchingNodes *list.List) error {
 
 		var destination io.Writer = writer
 		tempBuffer := bytes.NewBuffer(nil)
-		if p.nulSepOutput {
+		if p.nulSepOutput || p.joinOutput {
 			destination = tempBuffer
 		}
 
@@ -127,10 +133,15 @@ func (p *resultsPrinter) PrintResults(matchingNodes *list.List) error {
 			return err
 		}
 
-		if p.nulSepOutput {
-			removeLastEOL(tempBuffer)
+		if p.nulSepOutput || p.joinOutput {
+			if p.joinOutput && mappedDoc.Kind == ScalarNode && tempBuffer.String() == mappedDoc.Value+"\n" {
+				// Preserve a trailing carriage return that belongs to an unwrapped value.
+				tempBuffer.Truncate(tempBuffer.Len() - 1)
+			} else {
+				removeLastEOL(tempBuffer)
+			}
 			tempBufferBytes := tempBuffer.Bytes()
-			if bytes.IndexByte(tempBufferBytes, 0) != -1 {
+			if p.nulSepOutput && bytes.IndexByte(tempBufferBytes, 0) != -1 {
 				return fmt.Errorf(
 					"can't serialise value because it contains NUL char and you are using NUL separated output",
 				)
@@ -138,8 +149,10 @@ func (p *resultsPrinter) PrintResults(matchingNodes *list.List) error {
 			if _, err := writer.Write(tempBufferBytes); err != nil {
 				return err
 			}
-			if _, err := writer.Write([]byte{0}); err != nil {
-				return err
+			if p.nulSepOutput {
+				if _, err := writer.Write([]byte{0}); err != nil {
+					return err
+				}
 			}
 		}
 

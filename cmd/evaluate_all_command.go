@@ -97,6 +97,7 @@ func evaluateAll(cmd *cobra.Command, args []string) (cmdError error) {
 	}
 
 	printer := yqlib.NewPrinter(encoder, printerWriter)
+	printer.SetJoinOutput(joinOutput)
 	if nulSepOutput {
 		printer.SetNulSepOutput(true)
 	}

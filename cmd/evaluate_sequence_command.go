@@ -106,6 +106,7 @@ func evaluateSequence(cmd *cobra.Command, args []string) (cmdError error) {
 	}
 
 	printer := yqlib.NewPrinter(encoder, printerWriter)
+	printer.SetJoinOutput(joinOutput)
 
 	if printNodeInfo {
 		printer = yqlib.NewNodeInfoPrinter(printerWriter)

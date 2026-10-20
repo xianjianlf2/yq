@@ -23,6 +23,9 @@ func NewNodeInfoPrinter(printerWriter PrinterWriter) Printer {
 func (p *nodeInfoPrinter) SetNulSepOutput(_ bool) {
 }
 
+func (p *nodeInfoPrinter) SetJoinOutput(_ bool) {
+}
+
 func (p *nodeInfoPrinter) SetAppendix(reader io.Reader) {
 	p.appendixReader = reader
 }
